@@ -18,6 +18,20 @@ This repository contains my personal collection of Cursor rules for use across d
    ```
 3. The rules will automatically sync with your projects
 
+## Automatic Synchronization
+
+This repository automatically:
+- Syncs every 30 minutes
+- Performs a full sync daily at 4 AM
+- Syncs immediately when files change
+- Retries failed operations up to 3 times
+
+You can monitor sync operations in:
+```bash
+~/Library/Logs/cursor-rules-sync.log
+~/Library/Logs/cursor-rules-sync.error.log
+```
+
 ## License
 
 Copyright (c) 2024. All rights reserved. 
