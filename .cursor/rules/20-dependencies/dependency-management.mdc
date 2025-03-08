@@ -1,0 +1,98 @@
+---
+description: Standards for managing project dependencies and ensuring reproducible builds
+globs: ["**/requirements.txt", "**/package.json", "**/Cargo.toml", "**/go.mod", "**/pom.xml", "**/build.gradle", "**/*.csproj"]
+---
+# Dependency Management Standards
+
+Guidelines for managing project dependencies effectively and securely.
+
+<rule>
+name: dependency-management
+description: Enforce best practices for dependency management
+filters:
+  - type: file_name
+    pattern: "(requirements\\.txt|package\\.json|Cargo\\.toml|go\\.mod|pom\\.xml|build\\.gradle|\\.csproj)$"
+  - type: content
+    pattern: "(dependencies|devDependencies|requires|import|from)"
+
+actions:
+  - type: reject
+    conditions:
+      # Reject floating versions
+      - pattern: "(\\^|~|>|>=|\\*)"
+        message: "Use exact versions for dependencies to ensure reproducible builds"
+      # Reject unpinned requirements
+      - pattern: "^(?!.*==).*$"
+        file_pattern: "requirements.txt"
+        message: "Python requirements must use pinned versions (==)"
+      # Reject git dependencies without commit hashes
+      - pattern: "git\\+https?://[^#]+(#(?!([a-f0-9]{40}|[a-f0-9]{7})$).*)?$"
+        message: "Git dependencies must use commit hashes"
+      # Reject dependencies without integrity hashes
+      - pattern: "\"(dependencies|devDependencies)\":\\s*{[^}]*}"
+        not_pattern: "\"integrity\":\\s*\"sha[0-9]+-[A-Za-z0-9+/=]+\""
+        file_pattern: "package-lock.json"
+        message: "Dependencies must include integrity hashes"
+
+  - type: suggest
+    message: |
+      Dependencies should follow these guidelines:
+      1. Use exact versions (no ^, ~, >, >=, or *)
+      2. Include SHA hashes for git dependencies
+      3. Use lockfiles (package-lock.json, Cargo.lock, etc.)
+      4. Regular security audits (npm audit, cargo audit, etc.)
+      5. Minimize dependencies and prefer standard library
+      6. Document why each dependency is needed
+      7. Use vendoring when appropriate
+
+  - type: execute
+    command: |
+      case "$FILE_NAME" in
+        package.json)
+          npm audit
+          ;;
+        requirements.txt)
+          safety check
+          ;;
+        Cargo.toml)
+          cargo audit
+          ;;
+      esac
+
+examples:
+  - input: |
+      # requirements.txt
+      requests
+      pandas>=1.0.0
+      git+https://github.com/user/repo.git
+    output: |
+      # requirements.txt
+      requests==2.31.0  # HTTP library for API calls
+      pandas==2.1.0     # Data manipulation
+      git+https://github.com/user/repo.git@a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0  # Custom utilities
+
+  - input: |
+      // package.json
+      {
+        "dependencies": {
+          "express": "^4.17.1",
+          "lodash": "~4.17.21"
+        }
+      }
+    output: |
+      {
+        "dependencies": {
+          "express": "4.17.1",  // Web framework
+          "lodash": "4.17.21"   // Utility functions
+        }
+      }
+
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - dependencies
+    - security
+    - reproducibility
+    - automation
+</rule> 
