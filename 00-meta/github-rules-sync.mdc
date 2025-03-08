@@ -8,6 +8,11 @@ config:
   sync_on_change: true
   auto_commit: true
   commit_prefix: "rules"
+  sync_schedule:
+    check_interval_minutes: 30
+    daily_sync_time: "04:00"  # Run full sync at 4 AM local time
+    max_retries: 3
+    retry_delay_seconds: 300
 ---
 # GitHub Rules Sync
 
@@ -20,7 +25,7 @@ filters:
   - type: file_extension
     pattern: "\\.mdc$"
   - type: event
-    pattern: "(file_create|file_modify|file_delete)"
+    pattern: "(file_create|file_modify|file_delete|scheduled_check)"
 
 actions:
   - type: execute
@@ -31,12 +36,45 @@ actions:
       RULES_DIR=".cursor/rules"
       GITHUB_REPO="${CURSOR_RULES_REPO:-}"
       BRANCH="${CURSOR_RULES_BRANCH:-main}"
+      LAST_CHECK_FILE="/tmp/cursor_rules_last_check"
       
       if [[ -z "$GITHUB_REPO" ]]; then
         echo "Error: CURSOR_RULES_REPO environment variable not set"
         echo "Example: export CURSOR_RULES_REPO=username/cursor-rules"
         exit 1
       fi
+      
+      # Function to check if sync is needed based on schedule
+      check_sync_schedule() {
+        local current_time=$(date +%s)
+        local check_interval=$((30 * 60))  # 30 minutes in seconds
+        
+        # Create last check file if it doesn't exist
+        if [[ ! -f "$LAST_CHECK_FILE" ]]; then
+          echo "$current_time" > "$LAST_CHECK_FILE"
+          return 0
+        }
+        
+        # Read last check time
+        local last_check=$(cat "$LAST_CHECK_FILE")
+        local time_diff=$((current_time - last_check))
+        
+        # Check if it's time for daily full sync (4 AM)
+        local current_hour=$(date +%H)
+        local current_minute=$(date +%M)
+        if [[ "$current_hour" == "04" && "$current_minute" < "30" ]]; then
+          echo "$current_time" > "$LAST_CHECK_FILE"
+          return 0
+        fi
+        
+        # Check if interval has passed
+        if [[ $time_diff -ge $check_interval ]]; then
+          echo "$current_time" > "$LAST_CHECK_FILE"
+          return 0
+        fi
+        
+        return 1
+      }
       
       # Function to clone/update rules repo
       setup_repo() {
@@ -55,6 +93,8 @@ actions:
         local repo_dir="$1"
         local rules_dir="$2"
         local changed_files
+        local retry_count=0
+        local max_retries=3
         
         # Copy current rules to repo
         rsync -av --delete "$rules_dir/" "$repo_dir/rules/"
@@ -64,26 +104,38 @@ actions:
         changed_files=$(git status --porcelain)
         
         if [[ -n "$changed_files" ]]; then
-          # Stage changes
-          git add .
-          
-          # Create commit with detailed message
-          commit_msg="rules: Update cursor rules\n\nChanges:\n"
-          while IFS= read -r file; do
-            status="${file:0:2}"
-            filepath="${file:3}"
-            case "$status" in
-              "A ") commit_msg+="- Add: $filepath\n" ;;
-              "M ") commit_msg+="- Modify: $filepath\n" ;;
-              "D ") commit_msg+="- Delete: $filepath\n" ;;
-              *) commit_msg+="- Change: $filepath\n" ;;
-            esac
-          done <<< "$changed_files"
-          
-          # Commit and push changes
-          git commit -m "$(echo -e "$commit_msg")"
-          git push origin "$BRANCH"
-          echo "Changes pushed to GitHub repository"
+          while [[ $retry_count -lt $max_retries ]]; do
+            # Stage changes
+            git add .
+            
+            # Create commit with detailed message
+            commit_msg="rules: Update cursor rules\n\nChanges:\n"
+            while IFS= read -r file; do
+              status="${file:0:2}"
+              filepath="${file:3}"
+              case "$status" in
+                "A ") commit_msg+="- Add: $filepath\n" ;;
+                "M ") commit_msg+="- Modify: $filepath\n" ;;
+                "D ") commit_msg+="- Delete: $filepath\n" ;;
+                *) commit_msg+="- Change: $filepath\n" ;;
+              esac
+            done <<< "$changed_files"
+            
+            # Try to commit and push
+            if git commit -m "$(echo -e "$commit_msg")" && git push origin "$BRANCH"; then
+              echo "Changes pushed to GitHub repository"
+              break
+            else
+              retry_count=$((retry_count + 1))
+              if [[ $retry_count -lt $max_retries ]]; then
+                echo "Push failed, retrying in 5 minutes..."
+                sleep 300
+              else
+                echo "Failed to push changes after $max_retries attempts"
+                exit 1
+              fi
+            fi
+          done
         else
           echo "No changes to sync"
         fi
@@ -93,13 +145,26 @@ actions:
       sync_from_github() {
         local repo_dir="$1"
         local rules_dir="$2"
+        local retry_count=0
+        local max_retries=3
         
-        # Pull latest changes
-        git -C "$repo_dir" pull origin "$BRANCH"
-        
-        # Copy rules from repo to project
-        rsync -av --delete "$repo_dir/rules/" "$rules_dir/"
-        echo "Rules synchronized from GitHub repository"
+        while [[ $retry_count -lt $max_retries ]]; do
+          if git -C "$repo_dir" pull origin "$BRANCH"; then
+            # Copy rules from repo to project
+            rsync -av --delete "$repo_dir/rules/" "$rules_dir/"
+            echo "Rules synchronized from GitHub repository"
+            break
+          else
+            retry_count=$((retry_count + 1))
+            if [[ $retry_count -lt $max_retries ]]; then
+              echo "Pull failed, retrying in 5 minutes..."
+              sleep 300
+            else
+              echo "Failed to pull changes after $max_retries attempts"
+              exit 1
+            fi
+          fi
+        done
       }
       
       # Create temporary directory for repo
@@ -115,42 +180,39 @@ actions:
           # Local changes detected, sync to GitHub
           sync_to_github "$TEMP_DIR" "$RULES_DIR"
           ;;
+        "scheduled_check")
+          # Check if we should sync based on schedule
+          if check_sync_schedule; then
+            sync_from_github "$TEMP_DIR" "$RULES_DIR"
+          else
+            echo "Skipping sync, not scheduled"
+          fi
+          ;;
         *)
-          # No local changes, sync from GitHub
-          sync_from_github "$TEMP_DIR" "$RULES_DIR"
+          # Default to checking for updates
+          if check_sync_schedule; then
+            sync_from_github "$TEMP_DIR" "$RULES_DIR"
+          fi
           ;;
       esac
 
   - type: suggest
     message: |
-      To use GitHub rules synchronization:
+      Rules synchronization is configured with:
       
-      1. Create a GitHub repository for your rules
-      2. Set environment variables:
-         ```bash
-         # Required: GitHub repository
-         export CURSOR_RULES_REPO="username/cursor-rules"
-         
-         # Optional: Branch name (default: main)
-         export CURSOR_RULES_BRANCH="main"
-         ```
+      1. Automatic sync on file changes
+      2. Scheduled checks every 30 minutes
+      3. Daily full sync at 4 AM local time
+      4. Retry mechanism for failed operations
       
-      3. Initial setup:
-         ```bash
-         # Create GitHub repository structure
-         mkdir -p rules
-         cp -r .cursor/rules/* rules/
-         git init
-         git add .
-         git commit -m "rules: Initial commit"
-         git remote add origin https://github.com/$CURSOR_RULES_REPO.git
-         git push -u origin main
-         ```
+      To customize the schedule:
+      ```bash
+      # Change check interval (in minutes)
+      export CURSOR_RULES_CHECK_INTERVAL=15
       
-      4. The rules will automatically sync:
-         - When local rules are modified
-         - When remote rules are updated
-         - On project initialization
+      # Change daily sync time (24-hour format)
+      export CURSOR_RULES_DAILY_SYNC="03:00"
+      ```
 
 examples:
   - input: |
@@ -163,32 +225,36 @@ examples:
       - Add: rules/new-rule.mdc
 
   - input: |
-      # Remote rule updated
-      # Event type: daily_check
+      # Scheduled check at 4 AM
+      # Event type: scheduled_check
     output: |
+      Running daily full sync...
       Rules synchronized from GitHub repository
-      Updated: custom-rule.mdc
 
 metrics:
   - name: github_syncs
     type: counter
-    labels: ["direction", "status"]
+    labels: ["direction", "status", "trigger"]
   - name: sync_errors
     type: counter
-    labels: ["error_type"]
+    labels: ["error_type", "retry_count"]
   - name: files_synced
     type: counter
-    labels: ["operation"]
+    labels: ["operation", "status"]
   - name: sync_latency
     type: histogram
-    labels: ["operation"]
+    labels: ["operation", "status"]
+  - name: scheduled_checks
+    type: counter
+    labels: ["type", "result"]
 
 metadata:
   priority: high
-  version: 1.0.0
+  version: 1.0.1
   tags:
     - github
     - synchronization
     - version-control
     - automation
+    - scheduling
 </rule> 
