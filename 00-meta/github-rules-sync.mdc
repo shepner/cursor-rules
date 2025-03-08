@@ -1,0 +1,194 @@
+---
+description: Sync cursor rules with a dedicated GitHub repository
+globs: ["**/*.mdc"]
+alwaysApply: true
+config:
+  github_repo: "${CURSOR_RULES_REPO:-}"  # e.g., "username/cursor-rules"
+  branch: "${CURSOR_RULES_BRANCH:-main}"
+  sync_on_change: true
+  auto_commit: true
+  commit_prefix: "rules"
+---
+# GitHub Rules Sync
+
+Maintain cursor rules in a dedicated GitHub repository and sync changes bidirectionally.
+
+<rule>
+name: github-rules-sync
+description: Sync rules with GitHub repository
+filters:
+  - type: file_extension
+    pattern: "\\.mdc$"
+  - type: event
+    pattern: "(file_create|file_modify|file_delete)"
+
+actions:
+  - type: execute
+    command: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      
+      RULES_DIR=".cursor/rules"
+      GITHUB_REPO="${CURSOR_RULES_REPO:-}"
+      BRANCH="${CURSOR_RULES_BRANCH:-main}"
+      
+      if [[ -z "$GITHUB_REPO" ]]; then
+        echo "Error: CURSOR_RULES_REPO environment variable not set"
+        echo "Example: export CURSOR_RULES_REPO=username/cursor-rules"
+        exit 1
+      fi
+      
+      # Function to clone/update rules repo
+      setup_repo() {
+        local repo_dir="$1"
+        if [[ ! -d "$repo_dir/.git" ]]; then
+          git clone "https://github.com/$GITHUB_REPO.git" "$repo_dir"
+          git -C "$repo_dir" checkout -b "$BRANCH" 2>/dev/null || git -C "$repo_dir" checkout "$BRANCH"
+        else
+          git -C "$repo_dir" fetch origin
+          git -C "$repo_dir" reset --hard "origin/$BRANCH"
+        fi
+      }
+      
+      # Function to sync changes to GitHub
+      sync_to_github() {
+        local repo_dir="$1"
+        local rules_dir="$2"
+        local changed_files
+        
+        # Copy current rules to repo
+        rsync -av --delete "$rules_dir/" "$repo_dir/rules/"
+        
+        # Check for changes
+        cd "$repo_dir"
+        changed_files=$(git status --porcelain)
+        
+        if [[ -n "$changed_files" ]]; then
+          # Stage changes
+          git add .
+          
+          # Create commit with detailed message
+          commit_msg="rules: Update cursor rules\n\nChanges:\n"
+          while IFS= read -r file; do
+            status="${file:0:2}"
+            filepath="${file:3}"
+            case "$status" in
+              "A ") commit_msg+="- Add: $filepath\n" ;;
+              "M ") commit_msg+="- Modify: $filepath\n" ;;
+              "D ") commit_msg+="- Delete: $filepath\n" ;;
+              *) commit_msg+="- Change: $filepath\n" ;;
+            esac
+          done <<< "$changed_files"
+          
+          # Commit and push changes
+          git commit -m "$(echo -e "$commit_msg")"
+          git push origin "$BRANCH"
+          echo "Changes pushed to GitHub repository"
+        else
+          echo "No changes to sync"
+        fi
+      }
+      
+      # Function to sync changes from GitHub
+      sync_from_github() {
+        local repo_dir="$1"
+        local rules_dir="$2"
+        
+        # Pull latest changes
+        git -C "$repo_dir" pull origin "$BRANCH"
+        
+        # Copy rules from repo to project
+        rsync -av --delete "$repo_dir/rules/" "$rules_dir/"
+        echo "Rules synchronized from GitHub repository"
+      }
+      
+      # Create temporary directory for repo
+      TEMP_DIR=$(mktemp -d)
+      trap 'rm -rf "$TEMP_DIR"' EXIT
+      
+      # Setup repository
+      setup_repo "$TEMP_DIR"
+      
+      # Determine sync direction based on event
+      case "$EVENT_TYPE" in
+        "file_create"|"file_modify"|"file_delete")
+          # Local changes detected, sync to GitHub
+          sync_to_github "$TEMP_DIR" "$RULES_DIR"
+          ;;
+        *)
+          # No local changes, sync from GitHub
+          sync_from_github "$TEMP_DIR" "$RULES_DIR"
+          ;;
+      esac
+
+  - type: suggest
+    message: |
+      To use GitHub rules synchronization:
+      
+      1. Create a GitHub repository for your rules
+      2. Set environment variables:
+         ```bash
+         # Required: GitHub repository
+         export CURSOR_RULES_REPO="username/cursor-rules"
+         
+         # Optional: Branch name (default: main)
+         export CURSOR_RULES_BRANCH="main"
+         ```
+      
+      3. Initial setup:
+         ```bash
+         # Create GitHub repository structure
+         mkdir -p rules
+         cp -r .cursor/rules/* rules/
+         git init
+         git add .
+         git commit -m "rules: Initial commit"
+         git remote add origin https://github.com/$CURSOR_RULES_REPO.git
+         git push -u origin main
+         ```
+      
+      4. The rules will automatically sync:
+         - When local rules are modified
+         - When remote rules are updated
+         - On project initialization
+
+examples:
+  - input: |
+      # New rule created locally
+      .cursor/rules/new-rule.mdc
+      
+      # Event type: file_create
+    output: |
+      Changes pushed to GitHub repository
+      - Add: rules/new-rule.mdc
+
+  - input: |
+      # Remote rule updated
+      # Event type: daily_check
+    output: |
+      Rules synchronized from GitHub repository
+      Updated: custom-rule.mdc
+
+metrics:
+  - name: github_syncs
+    type: counter
+    labels: ["direction", "status"]
+  - name: sync_errors
+    type: counter
+    labels: ["error_type"]
+  - name: files_synced
+    type: counter
+    labels: ["operation"]
+  - name: sync_latency
+    type: histogram
+    labels: ["operation"]
+
+metadata:
+  priority: high
+  version: 1.0.0
+  tags:
+    - github
+    - synchronization
+    - version-control
+    - automation
+</rule> 

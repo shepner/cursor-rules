@@ -1,0 +1,177 @@
+---
+description: Guidelines for managing copyright headers across the codebase
+globs: ["*"]
+alwaysApply: true
+---
+# Copyright Management Guidelines
+
+Rules for ensuring consistent copyright headers across all files.
+
+<rule>
+name: copyright-management
+description: Standards for managing copyright headers and license information
+filters:
+  # Match all source code files
+  - type: file_extension
+    pattern: "\\.(py|js|ts|java|cpp|h|hpp|cs|go|rs|rb|php|scala|kt|swift|m|mm|sh|bash|zsh|sql|r|pl|pm|t|psm1|ps1|groovy|gradle|sbt|xml|yaml|yml|json|toml|ini|conf|cfg|properties|md|rst|txt|html|css|scss|sass|less)$"
+  # Match file creation and modification events
+  - type: event
+    pattern: "(file_create|file_modify)"
+  # Match content that might need copyright
+  - type: content
+    pattern: "(copyright|license|SPDX|©|\\(c\\)|all\\s+rights\\s+reserved)"
+
+actions:
+  - type: reject
+    conditions:
+      # Reject missing copyright headers in source files
+      - pattern: "^(?!(\\s*[#/*-].*Copyright|\\s*<!--.*Copyright))"
+        message: "Source files must include a copyright header"
+      # Reject incorrect copyright format
+      - pattern: "Copyright\\s*(?!\\([Cc]\\)\\s*\\d{4})"
+        message: "Copyright must include (c) and year"
+      # Reject missing SPDX identifiers
+      - pattern: "Copyright.*(?!SPDX-License-Identifier:)"
+        message: "Copyright header must include SPDX license identifier"
+
+  - type: execute
+    command: |
+      # Get user information from git config
+      GIT_NAME=$(git config user.name)
+      GIT_EMAIL=$(git config user.email)
+      CURRENT_YEAR=$(date +%Y)
+      
+      # Get license type from environment or default to Proprietary
+      LICENSE_TYPE="${COPYRIGHT_LICENSE:-Proprietary}"
+      
+      # Function to generate copyright header based on file extension
+      generate_copyright() {
+        local file="$1"
+        local ext="${file##*.}"
+        local header=""
+        
+        case "$ext" in
+          py|sh|bash|zsh|r|pl|pm|rb|ps1|psm1|yaml|yml|properties)
+            header="# Copyright (c) $CURRENT_YEAR $GIT_NAME <$GIT_EMAIL>. All rights reserved.\n# SPDX-License-Identifier: $LICENSE_TYPE"
+            ;;
+          js|ts|java|cpp|c|h|hpp|cs|go|rs|scala|kt|swift|m|mm|css|scss|sass|less)
+            header="/*\n * Copyright (c) $CURRENT_YEAR $GIT_NAME <$GIT_EMAIL>. All rights reserved.\n * SPDX-License-Identifier: $LICENSE_TYPE\n */"
+            ;;
+          html|xml)
+            header="<!--\n Copyright (c) $CURRENT_YEAR $GIT_NAME <$GIT_EMAIL>. All rights reserved.\n SPDX-License-Identifier: $LICENSE_TYPE\n-->"
+            ;;
+          sql)
+            header="-- Copyright (c) $CURRENT_YEAR $GIT_NAME <$GIT_EMAIL>. All rights reserved.\n-- SPDX-License-Identifier: $LICENSE_TYPE"
+            ;;
+          *)
+            header="# Copyright (c) $CURRENT_YEAR $GIT_NAME <$GIT_EMAIL>. All rights reserved.\n# SPDX-License-Identifier: $LICENSE_TYPE"
+            ;;
+        esac
+        
+        # Add header to file if it doesn't exist
+        if ! grep -q "Copyright (c)" "$file"; then
+          temp_file=$(mktemp)
+          echo -e "$header\n\n$(cat "$file")" > "$temp_file"
+          mv "$temp_file" "$file"
+        fi
+      }
+      
+      # Apply copyright header to changed file
+      generate_copyright "$FILE"
+
+  - type: suggest
+    message: |
+      When managing copyright headers:
+
+      1. Header Format:
+         - Include copyright symbol or (c)
+         - Specify the year(s)
+         - List copyright holder (from git config)
+         - Add SPDX license identifier
+         - Use appropriate comment style
+         - Keep header at file start
+         - Follow language conventions
+
+      2. Comment Styles:
+         - Shell/Python: # Copyright...
+         - C-style: /* Copyright... */
+         - HTML/XML: <!-- Copyright... -->
+         - SQL: -- Copyright...
+         - Batch: REM Copyright...
+         - PowerShell: # Copyright...
+         - Properties: # Copyright...
+
+      3. Header Components:
+         - Copyright notice
+         - Year range (if applicable)
+         - Owner information (from git config)
+         - Contact details (from git config)
+         - License identifier (from COPYRIGHT_LICENSE env var)
+         - All rights reserved notice
+         - File description (optional)
+
+      4. Configuration:
+         - Set git user.name and user.email
+         - Set COPYRIGHT_LICENSE environment variable
+         - Update git config for new projects
+         - Verify git configuration
+         - Document license choices
+         - Track copyright holders
+         - Manage multiple contributors
+
+      5. Maintenance:
+         - Update year ranges
+         - Keep owner information current
+         - Maintain consistent format
+         - Verify license compliance
+         - Document exceptions
+         - Track header changes
+         - Automate updates
+
+examples:
+  - input: |
+      # Bad: Missing or incorrect copyright headers
+      def main():
+          pass
+
+      // Copyright 2025  # Missing holder and SPDX
+      
+      /* Copyright by someone */  # Incorrect format
+
+      # Good: Proper copyright headers (using git config)
+      # Python/Shell script
+      # Copyright (c) 2025 John Doe <john.doe@example.com>. All rights reserved.
+      # SPDX-License-Identifier: MIT
+
+      # C-style languages
+      /*
+       * Copyright (c) 2025 John Doe <john.doe@example.com>. All rights reserved.
+       * SPDX-License-Identifier: Apache-2.0
+       */
+
+      # HTML/XML
+      <!--
+       Copyright (c) 2025 John Doe <john.doe@example.com>. All rights reserved.
+       SPDX-License-Identifier: GPL-3.0
+      -->
+
+      # SQL
+      -- Copyright (c) 2025 John Doe <john.doe@example.com>. All rights reserved.
+      -- SPDX-License-Identifier: Proprietary
+
+      # Properties/Config
+      # Copyright (c) 2025 John Doe <john.doe@example.com>. All rights reserved.
+      # SPDX-License-Identifier: BSD-3-Clause
+
+metadata:
+  priority: high
+  version: 1.1
+  tags:
+    - copyright
+    - license
+    - compliance
+    - legal
+  changelog:
+    - 1.0: Initial version with comprehensive copyright management guidelines
+    - 1.1: Updated to use git config and environment variables for user information
+</rule> 
