@@ -15,8 +15,9 @@ Validates that each Cursor rule has at least the minimum required number of exam
 ## Config
 
 ```yaml
-min_examples: 2
-max_file_size: 10000  # bytes
+validation:
+  min_examples: 2
+  max_file_size: 10000  # bytes
 ```
 
 ## Filters

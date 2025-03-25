@@ -15,14 +15,15 @@ Validates that each Cursor rule contains all required sections in its markdown c
 ## Config
 
 ```yaml
-required_sections:
-  - Description
-  - Config
-  - Filters
-  - Actions
-  - Examples
-  - Metrics
-  - Metadata
+validation:
+  required_sections:
+    - Description
+    - Config
+    - Filters
+    - Actions
+    - Examples
+    - Metrics
+    - Metadata
 ```
 
 ## Filters

@@ -15,15 +15,15 @@ Validates the YAML frontmatter of Cursor rules to ensure they contain all requir
 ## Config
 
 ```yaml
-required_properties:
-  - description
-  - globs
-  - alwaysApply
-
-forbidden_properties:
-  - absolute_paths
-  - workspace_specific_refs
-  - user_specific_settings
+validation:
+  required_properties:
+    - description
+    - globs
+    - alwaysApply
+  forbidden_properties:
+    - absolute_paths
+    - workspace_specific_refs
+    - user_specific_settings
 ```
 
 ## Filters
