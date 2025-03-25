@@ -1,4 +1,163 @@
 ---
+name: code-logging
+description: Standards for implementing comprehensive logging and monitoring across the project
+priority: critical
+version: 2.1
+tags:
+  - logging
+  - monitoring
+  - security
+  - audit
+  - compliance
+  - detection
+related_rules:
+  - security-data.mdc
+  - security-data-docs.mdc
+changelog:
+  - version: 2.1
+    date: 2024-03-19
+    description: Added references to security data rules and enhanced data protection requirements
+  - version: 2.0
+    date: 2024-03-19
+    description: Updated with comprehensive logging standards from technological controls
+filters:
+  file_extensions:
+    - py
+    - js
+    - ts
+    - java
+    - cpp
+    - cs
+    - go
+    - rs
+    - rb
+    - php
+    - log
+    - yaml
+    - yml
+    - json
+  content_patterns:
+    - log
+    - audit
+    - monitor
+    - trace
+    - debug
+    - info
+    - warn
+    - error
+    - fatal
+    - siem
+    - event
+
+actions:
+  validation:
+    - condition: "(?i)print\\s*\\([^)]*\\)"
+      message: "Use proper logging mechanisms instead of print statements"
+    - condition: "(?i)(password|secret|token|key).*log"
+      message: "Do not log sensitive information directly - refer to security-data.mdc for data classification"
+    - condition: "while\\s*\\(\\s*true\\s*\\)"
+      message: "Avoid infinite loops in logging mechanisms"
+    - condition: "(?i)log\\.debug\\s*\\("
+      message: "Ensure debug logging is not enabled in production"
+    - condition: "(?i)log\\.(trace|debug|info|warn|error|fatal)\\s*\\([^)]*\\)"
+      message: "Include appropriate context in log messages"
+    - condition: "(?i)(pii|personal|sensitive).*log"
+      message: "Ensure compliance with security-data.mdc guidelines for handling sensitive data in logs"
+
+suggestions:
+  - category: General Logging Requirements
+    items:
+      - "Implement structured logging with consistent formats"
+      - "Include essential fields: timestamp, severity, source, event type, correlation ID"
+      - "Use appropriate log levels (DEBUG, INFO, WARN, ERROR, FATAL)"
+      - "Ensure logs are machine-readable and parseable"
+      - "Implement log rotation and retention policies"
+      - "Follow security-data-docs.mdc guidelines for documenting log handling procedures"
+      
+  - category: Security Event Logging
+    items:
+      - "Log all authentication attempts (success and failure)"
+      - "Log all privileged operations and access to sensitive resources"
+      - "Log security-relevant configuration changes"
+      - "Log system and application startup/shutdown events"
+      - "Include user identification in security-relevant logs"
+      - "Adhere to security-data.mdc classification for sensitive operations"
+      
+  - category: Log Protection
+    items:
+      - "Implement append-only logging where possible"
+      - "Use cryptographic hashing for log integrity"
+      - "Restrict log access to authorized personnel"
+      - "Implement backup procedures for log data"
+      - "Use secure transmission for log forwarding"
+      - "Follow security-data.mdc guidelines for log data protection"
+      
+  - category: Log Analysis
+    items:
+      - "Implement automated log analysis and alerting"
+      - "Use SIEM or equivalent tools for log aggregation"
+      - "Establish baseline behavior patterns"
+      - "Configure correlation rules for security events"
+      - "Monitor for anomalous patterns and behaviors"
+      - "Apply security-data.mdc classification for analysis results"
+      
+  - category: Compliance and Privacy
+    items:
+      - "Implement required retention periods as specified in security-data-docs.mdc"
+      - "Mask or encrypt sensitive data in logs according to security-data.mdc guidelines"
+      - "Ensure compliance with privacy regulations"
+      - "Maintain audit trails for compliance purposes"
+      - "Document log handling procedures in accordance with security-data-docs.mdc"
+
+examples:
+  bad:
+    - name: "Insecure Logging"
+      code: |
+        print(f"User {username} logged in with password {password}")
+        log.debug("API key: " + api_key)
+        while True:
+          log.info("Monitoring...")
+          
+  good:
+    - name: "Secure Structured Logging"
+      code: |
+        # Following security-data.mdc guidelines for data classification
+        logger.info("User authentication", 
+          extra={
+            "user_id": user_id,
+            "event_type": "authentication",
+            "success": True,
+            "source_ip": request.remote_addr,
+            "timestamp": datetime.utcnow().isoformat(),
+            "data_classification": "restricted"  # As per security-data.mdc
+          })
+          
+    - name: "Protected Sensitive Data"
+      code: |
+        # Implementing security-data.mdc masking requirements
+        logger.warning("Failed authentication attempt",
+          extra={
+            "user_id": hash_or_mask(user_id),  # Following security-data.mdc masking rules
+            "attempt_count": attempts,
+            "locked": account_locked,
+            "security_event": True,
+            "data_classification": "sensitive"  # As per security-data.mdc
+          })
+          
+    - name: "Log Analysis Integration"
+      code: |
+        # Adhering to security-data.mdc for security event handling
+        logger.error("Security violation detected",
+          extra={
+            "alert_id": generate_alert_id(),
+            "severity": "high",
+            "event_category": "security",
+            "correlation_id": request_id,
+            "details": sanitize_data(event_details),  # Following security-data.mdc sanitization rules
+            "data_classification": "confidential"  # As per security-data.mdc
+          })
+
+---
 description: Standards for implementing comprehensive logging and monitoring across the project
 globs: ["*.py", "*.sql", "*.sh"]
 alwaysApply: true
