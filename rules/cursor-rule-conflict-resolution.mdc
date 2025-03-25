@@ -2,25 +2,6 @@
 description: Guidelines for detecting, resolving, and learning from rule conflicts
 globs: ["**/*.mdc"]
 alwaysApply: true
-config:
-  conflict_detection:
-    types:
-      - contradictory_actions
-      - overlapping_patterns
-      - competing_priorities
-      - resource_conflicts
-      - timing_conflicts
-    severity_levels:
-      - critical    # Rules cannot coexist
-      - major      # Rules significantly interfere
-      - minor      # Rules have slight overlap
-  resolution:
-    prompt_threshold: "minor"  # Prompt for all conflict levels
-    auto_resolve_threshold: "none"  # Never auto-resolve
-    learning_enabled: true
-  history:
-    retention_days: 365
-    max_records: 1000
 ---
 # Rule Conflict Resolution Guidelines
 

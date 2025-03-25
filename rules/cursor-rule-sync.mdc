@@ -1,0 +1,162 @@
+---
+description: Guidelines for synchronizing rules with the Cursor rules repository
+globs: ["**/*.mdc"]
+alwaysApply: true
+config:
+  migration:
+    verify_dependencies: true
+    auto_adapt_paths: true
+    preserve_history: true
+  validation:
+    required_properties: [
+      "description",
+      "globs",
+      "alwaysApply"
+    ]
+    forbidden_properties: [
+      "absolute_paths",
+      "workspace_specific_refs",
+      "user_specific_settings"
+    ]
+  compatibility:
+    min_cursor_version: "1.0.0"
+    supported_os: ["linux", "darwin", "windows"]
+  sync:
+    interval_hours: 24
+    api_endpoint: "${CURSOR_RULES_API:-https://www.cursorrules.org/api}"
+    categories:
+      - "Backend Development"
+      - "Frontend Frameworks"
+      - "Database and API"
+      - "Testing"
+      - "Tools and DevOps"
+      - "Language-Specific"
+    backup:
+      enabled: true
+      retention_days: 7
+    validation:
+      verify_signatures: true
+      check_compatibility: true
+---
+# Rule Synchronization Guidelines
+
+Guidelines for synchronizing rules with the Cursor rules repository while maintaining portability and security.
+
+<rule>
+name: rule-sync
+description: Standards for synchronizing rules with the community repository
+filters:
+  - type: file_extension
+    pattern: "\\.mdc$"
+  - type: event
+    pattern: "(file_create|file_modify|daily_check)"
+
+actions:
+  - type: validate
+    conditions:
+      # Check rule portability
+      - check: "has_required_properties"
+        message: "Missing required properties"
+      - check: "no_forbidden_properties"
+        message: "Contains forbidden properties"
+      - check: "os_compatibility"
+        message: "OS compatibility check failed"
+
+  - type: sync
+    conditions:
+      # Check for updates
+      - check: "check_for_updates"
+        action: "download_updates"
+        backup: true
+      # Validate updates
+      - check: "validate_updates"
+        action: "apply_updates"
+        verify: true
+
+  - type: report
+    conditions:
+      # Generate sync report
+      - check: "generate_report"
+        action: "create_report"
+        format: "json"
+        include: ["updates", "failures", "compatibility_issues"]
+
+functions:
+  check_for_updates: |
+    def check():
+      """
+      Check for available rule updates.
+      Returns (has_updates, update_info).
+      """
+      try:
+        catalog = fetch_catalog()
+        updates = []
+        for rule in get_local_rules():
+          if has_update(rule, catalog):
+            updates.append(get_update_info(rule, catalog))
+        return len(updates) > 0, updates
+      except Exception as e:
+        log_error("Update check failed", e)
+        return False, []
+
+  validate_updates: |
+    def validate(updates):
+      """
+      Validate downloaded updates.
+      Returns (is_valid, issues).
+      """
+      issues = []
+      for update in updates:
+        if not verify_signature(update):
+          issues.append(f"Invalid signature for {update.name}")
+        if not check_compatibility(update):
+          issues.append(f"Incompatible version for {update.name}")
+      return len(issues) == 0, issues
+
+examples:
+  - input: |
+      # Good: Portable sync configuration
+      ---
+      description: "Example sync rule"
+      globs: ["**/*.mdc"]
+      alwaysApply: true
+      config:
+        sync:
+          interval_hours: 24
+          api_endpoint: "${CURSOR_RULES_API:-https://www.cursorrules.org/api}"
+
+      # Bad: Non-portable sync configuration
+      ---
+      description: "Example sync rule"
+      globs: ["/home/user/.cursor/rules/**/*.mdc"]
+      api_endpoint: "https://www.cursorrules.org/api"
+      user_settings:
+        backup_dir: "/home/user/.cursor/backups"
+
+metrics:
+  - name: sync_attempts
+    type: counter
+    labels: ["result"]
+  - name: update_downloads
+    type: counter
+    labels: ["rule_name", "result"]
+  - name: validation_errors
+    type: counter
+    labels: ["error_type"]
+  - name: sync_duration
+    type: histogram
+    labels: ["phase"]
+  - name: compatibility_issues
+    type: counter
+    labels: ["rule_name", "issue_type"]
+
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - sync
+    - updates
+    - validation
+    - security
+  changelog:
+    - 1.0: Initial version with portable sync capabilities 

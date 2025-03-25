@@ -1,0 +1,100 @@
+---
+description: Standards for naming files and code elements in the project
+globs: ["**/*"]
+alwaysApply: true
+---
+# Code and File Naming Standards
+
+This document defines the naming standards for all files and code elements in the project.
+
+## Rule Files (.mdc)
+
+1. Use kebab-case for all rule filenames
+2. Prefix rule files with their category:
+   - `code-*` for code-related rules
+   - `cursor-*` for Cursor IDE specific rules
+   - `git-*` for git-related rules
+   - `docker-*` for Docker-related rules
+   - `gcp-*` for Google Cloud Platform rules
+3. Use descriptive, specific names that clearly indicate the rule's purpose
+4. Keep names concise but informative
+5. Avoid abbreviations unless they are widely accepted
+
+Examples:
+- ✅ `code-style.mdc`
+- ✅ `cursor-rule-automation.mdc`
+- ✅ `git-best-practices.mdc`
+- ❌ `style.mdc` (missing category prefix)
+- ❌ `cursor_automation.mdc` (using underscore instead of hyphen)
+- ❌ `gitbp.mdc` (using abbreviation)
+
+## Source Code Files
+
+1. Use kebab-case for all filenames
+2. Use appropriate file extensions based on language
+3. Use descriptive names that indicate the file's purpose
+4. Keep names concise but informative
+5. Avoid abbreviations unless they are widely accepted
+
+Examples:
+- ✅ `user-authentication.py`
+- ✅ `data-validator.ts`
+- ✅ `api-client.js`
+- ❌ `auth.py` (too abbreviated)
+- ❌ `data_validator.ts` (using underscore instead of hyphen)
+- ❌ `apiclient.js` (missing hyphen)
+
+## Directories
+
+1. Use kebab-case for all directory names
+2. Use descriptive names that indicate the directory's purpose
+3. Keep names concise but informative
+4. Avoid abbreviations unless they are widely accepted
+
+Examples:
+- ✅ `src/components`
+- ✅ `tests/integration`
+- ✅ `docs/api-reference`
+- ❌ `src/comp` (too abbreviated)
+- ❌ `test_integration` (using underscore instead of hyphen)
+- ❌ `docs/apiref` (using abbreviation)
+
+## Code Elements
+
+1. Use camelCase for:
+   - Variable names
+   - Function names
+   - Method names
+   - Property names
+
+2. Use PascalCase for:
+   - Class names
+   - Interface names
+   - Type names
+   - Enum names
+
+3. Use UPPER_SNAKE_CASE for:
+   - Constants
+   - Enum values
+   - Global variables
+
+4. Use descriptive names that clearly indicate the element's purpose
+5. Keep names concise but informative
+6. Avoid abbreviations unless they are widely accepted
+
+Examples:
+```typescript
+// Variables and functions
+const userCount = 0;
+function calculateTotal() {}
+const isValid = true;
+
+// Classes and interfaces
+class UserAuthentication {}
+interface DataValidator {}
+type ValidationResult = string | number;
+
+// Constants
+const MAX_RETRY_COUNT = 3;
+const API_BASE_URL = 'https://api.example.com';
+``` 

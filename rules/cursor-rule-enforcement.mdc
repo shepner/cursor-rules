@@ -1,0 +1,151 @@
+---
+description: Guidelines for strict enforcement of all Cursor rules
+globs: ["**/*"]
+alwaysApply: true
+config:
+  migration:
+    verify_dependencies: true
+    auto_adapt_paths: true
+    preserve_history: true
+  validation:
+    required_properties: [
+      "description",
+      "globs",
+      "alwaysApply"
+    ]
+    forbidden_properties: [
+      "absolute_paths",
+      "workspace_specific_refs",
+      "user_specific_settings"
+    ]
+  compatibility:
+    min_cursor_version: "1.0.0"
+    supported_os: ["linux", "darwin", "windows"]
+---
+# Rule Enforcement Guidelines
+
+Guidelines for ensuring strict compliance with all Cursor rules.
+
+<rule>
+name: rule-enforcement
+description: Standards for enforcing rule compliance
+filters:
+  # Match all relevant files
+  - type: any_file
+    pattern: ".*"
+  # Match git operations
+  - type: git_event
+    pattern: "(commit|push|merge)"
+  # Match IDE operations
+  - type: ide_event
+    pattern: "(save|open|close)"
+
+actions:
+  - type: validate
+    conditions:
+      # Check rule compliance
+      - check: "has_required_properties"
+        message: "Missing required properties"
+      - check: "no_forbidden_properties"
+        message: "Contains forbidden properties"
+      - check: "os_compatibility"
+        message: "OS compatibility check failed"
+
+  - type: enforce
+    conditions:
+      # Enforce rule compliance
+      - check: "rule_compliance"
+        action: "block_operation"
+        message: "Operation blocked due to rule violation"
+
+  - type: report
+    conditions:
+      # Generate compliance report
+      - check: "generate_report"
+        action: "create_report"
+        format: "json"
+        include: ["violations", "suggestions", "compliance_score"]
+
+functions:
+  has_required_properties: |
+    def check():
+      """
+      Check if all required properties are present.
+      Returns (is_compliant, missing_properties).
+      """
+      required = config.validation.required_properties
+      missing = []
+      for prop in required:
+        if not has_property(prop):
+          missing.append(prop)
+      return len(missing) == 0, missing
+
+  no_forbidden_properties: |
+    def check():
+      """
+      Check if any forbidden properties are present.
+      Returns (is_compliant, forbidden_properties).
+      """
+      forbidden = config.validation.forbidden_properties
+      found = []
+      for prop in forbidden:
+        if has_property(prop):
+          found.append(prop)
+      return len(found) == 0, found
+
+  os_compatibility: |
+    def check():
+      """
+      Check OS compatibility.
+      Returns (is_compatible, issues).
+      """
+      current_os = get_current_os()
+      supported = config.compatibility.supported_os
+      return current_os in supported, []
+
+examples:
+  - input: |
+      # Good: Compliant rule
+      ---
+      description: "Example rule"
+      globs: ["**/*"]
+      alwaysApply: true
+      config:
+        compatibility:
+          supported_os: ["linux", "darwin", "windows"]
+
+      # Bad: Non-compliant rule
+      ---
+      description: "Example rule"
+      globs: ["${workspace}/**/*"]
+      user_settings:
+        path: "/home/user/.cursor"
+
+metrics:
+  - name: rule_violations
+    type: counter
+    labels: ["rule_name", "violation_type"]
+  - name: enforcement_actions
+    type: counter
+    labels: ["action_type", "result"]
+  - name: validation_performance
+    type: histogram
+    labels: ["check_type"]
+  - name: blocked_operations
+    type: counter
+    labels: ["operation_type", "reason"]
+  - name: auto_fixes
+    type: counter
+    labels: ["rule_name", "fix_type"]
+
+metadata:
+  priority: critical
+  version: 1.0
+  tags:
+    - enforcement
+    - compliance
+    - validation
+    - monitoring
+  changelog:
+    - 1.0: Initial version with comprehensive enforcement capabilities
+</rule> 
