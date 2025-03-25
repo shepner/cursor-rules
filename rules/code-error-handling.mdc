@@ -1,7 +1,18 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description: Standards for implementing robust error handling across the project
+globs: ["*.py", "*.sql", "*.sh"]
+alwaysApply: true
+config:
+  error_handling:
+    python:
+      require_specific_exceptions: true
+      require_error_context: true
+    sql:
+      require_transaction_management: true
+      require_deadlock_handling: true
+    shell:
+      require_error_checking: true
+      require_cleanup: true
 ---
 # Error Handling Guidelines
 

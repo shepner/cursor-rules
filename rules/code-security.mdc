@@ -1,9 +1,132 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description: Standards for implementing secure coding practices and handling sensitive data
+globs: ["*.py", "*.js", "*.ts", "*.java", "*.cpp", "*.cs", "*.go", "*.rs", "*.rb", "*.php", "*.{json,yaml,yml,toml,ini,conf}"]
+alwaysApply: true
+config:
+  security:
+    sensitive_patterns:
+      - "password"
+      - "secret"
+      - "key"
+      - "token"
+      - "credential"
+    encryption:
+      required: true
+      algorithms: ["AES-256", "RSA-4096"]
+    validation:
+      input: true
+      output: true
+    authentication:
+      required: true
+      methods: ["OAuth2", "JWT"]
 ---
-# Code Security Guidelines
+# Security Standards
+
+Rules for implementing secure coding practices and handling sensitive data.
+
+<rule>
+name: code-security
+description: Standards for implementing secure coding practices and handling sensitive data
+filters:
+  # Match source code files
+  - type: file_extension
+    pattern: "\\.(py|js|ts|java|cpp|cs|go|rs|rb|php)$"
+  # Match configuration files
+  - type: file_extension
+    pattern: "\\.(json|yaml|yml|toml|ini|conf)$"
+  # Match security patterns
+  - type: content
+    pattern: "(password|secret|key|token|credential|encrypt|decrypt|hash|salt)"
+
+actions:
+  - type: validate
+    conditions:
+      # Check for hardcoded secrets
+      - pattern: "\\b(?:password|secret|key|token)\\s*=\\s*['\"][^'\"]+['\"]"
+        message: "Do not hardcode sensitive values"
+      # Check for unsafe SQL
+      - pattern: "execute\\(['\"].*?\\$\\{.*?\\}.*?['\"]\\)"
+        message: "Use parameterized queries to prevent SQL injection"
+      # Check for unsafe file operations
+      - pattern: "open\\(.*?\\+.*?['\"]w['\"]\\)"
+        message: "Use safe file operations with proper permissions"
+
+  - type: suggest
+    message: |
+      When implementing security:
+
+      1. Data Protection:
+         - Encrypt sensitive data
+         - Use secure algorithms
+         - Implement proper key management
+         - Hash passwords with salt
+         - Secure data transmission
+         - Implement access controls
+         - Audit data access
+
+      2. Input Validation:
+         - Validate all inputs
+         - Sanitize user data
+         - Prevent injection attacks
+         - Use parameterized queries
+         - Implement rate limiting
+         - Validate file uploads
+         - Check data types
+
+      3. Authentication:
+         - Use secure authentication
+         - Implement proper session management
+         - Use secure password policies
+         - Implement MFA where possible
+         - Handle failed login attempts
+         - Secure password reset
+         - Use secure tokens
+
+      4. Configuration:
+         - Secure configuration storage
+         - Use environment variables
+         - Implement secrets management
+         - Secure API keys
+         - Use secure defaults
+         - Regular security updates
+         - Monitor security events
+
+examples:
+  - input: |
+      # Bad: Insecure password handling
+      def check_password(password):
+          if password == "admin123":
+              return True
+          return False
+
+      # Good: Secure password handling
+      from passlib.hash import pbkdf2_sha256
+      from secrets import token_bytes
+
+      def check_password(password: str, stored_hash: str) -> bool:
+          salt = token_bytes(16)
+          return pbkdf2_sha256.verify(password, stored_hash)
+
+  - input: |
+      # Bad: SQL injection vulnerability
+      def get_user(username):
+          query = f"SELECT * FROM users WHERE username = '{username}'"
+          return execute(query)
+
+      # Good: Parameterized query
+      def get_user(username: str):
+          query = "SELECT * FROM users WHERE username = %s"
+          return execute(query, (username,))
+
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - security
+    - encryption
+    - authentication
+  changelog:
+    - 1.0: Initial version with comprehensive security guidelines
 
 ## Overview
 Standards for implementing secure coding practices across the project.

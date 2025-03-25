@@ -1,100 +1,142 @@
 ---
-description: Standards for naming files and code elements in the project
-globs: ["**/*"]
+description: Standards for naming Cursor rules and their files
+globs: ["**/*.mdc"]
 alwaysApply: true
+config:
+  naming:
+    prefixes:
+      cursor:
+        - cursor-rule-*
+        - cursor-models-*
+      code:
+        - code-*
+        - code-gcp-*
+        - code-aws-*
+        - code-azure-*
+      git:
+        - git-*
+      docker:
+        - docker-*
+    patterns:
+      - pattern: "^[a-z0-9-]+$"
+        message: "Use kebab-case for all filenames"
+      - pattern: "^[a-z]+-"
+        message: "Start with a valid prefix"
+      - pattern: "\\.mdc$"
+        message: "Use .mdc extension"
+    max_length: 50
+    min_length: 10
 ---
-# Code and File Naming Standards
+# Rule Naming Standards
 
-This document defines the naming standards for all files and code elements in the project.
+Standards for naming Cursor rules and their files.
 
-## Rule Files (.mdc)
+<rule>
+name: rule-naming
+description: Standards for naming rule files
+filters:
+  # Match rule files
+  - type: file_extension
+    pattern: "\\.mdc$"
+  # Match rule content
+  - type: content
+    pattern: "^(---|#)"
 
-1. Use kebab-case for all rule filenames
-2. Prefix rule files with their category:
-   - `code-*` for code-related rules
-   - `cursor-*` for Cursor IDE specific rules
-   - `git-*` for git-related rules
-   - `docker-*` for Docker-related rules
-   - `gcp-*` for Google Cloud Platform rules
-3. Use descriptive, specific names that clearly indicate the rule's purpose
-4. Keep names concise but informative
-5. Avoid abbreviations unless they are widely accepted
+actions:
+  - type: reject
+    conditions:
+      # Reject invalid prefixes
+      - pattern: "^(?!cursor-rule-|cursor-models-|code-|code-gcp-|code-aws-|code-azure-|git-|docker-)"
+        message: "File must start with a valid prefix"
+      # Reject invalid characters
+      - pattern: "[^a-z0-9-]"
+        message: "Use only lowercase letters, numbers, and hyphens"
+      # Reject invalid length
+      - pattern: "^.{0,9}|.{51,}"
+        message: "Filename length must be between 10 and 50 characters"
+      # Reject invalid extension
+      - pattern: "(?!\\.mdc$)"
+        message: "Use .mdc extension"
 
-Examples:
-- ✅ `code-style.mdc`
-- ✅ `cursor-rule-automation.mdc`
-- ✅ `git-best-practices.mdc`
-- ❌ `style.mdc` (missing category prefix)
-- ❌ `cursor_automation.mdc` (using underscore instead of hyphen)
-- ❌ `gitbp.mdc` (using abbreviation)
+  - type: suggest
+    message: |
+      When naming rule files:
 
-## Source Code Files
+      1. Use appropriate prefix:
+         - cursor-rule-* for core Cursor rules
+         - cursor-models-* for model definitions
+         - code-* for general code standards
+         - code-gcp-* for Google Cloud Platform standards
+         - code-aws-* for AWS standards
+         - code-azure-* for Azure standards
+         - git-* for Git-related standards
+         - docker-* for Docker-related standards
 
-1. Use kebab-case for all filenames
-2. Use appropriate file extensions based on language
-3. Use descriptive names that indicate the file's purpose
-4. Keep names concise but informative
-5. Avoid abbreviations unless they are widely accepted
+      2. Follow naming conventions:
+         - Use kebab-case (lowercase with hyphens)
+         - Keep names descriptive but concise
+         - Avoid special characters
+         - Use .mdc extension
 
-Examples:
-- ✅ `user-authentication.py`
-- ✅ `data-validator.ts`
-- ✅ `api-client.js`
-- ❌ `auth.py` (too abbreviated)
-- ❌ `data_validator.ts` (using underscore instead of hyphen)
-- ❌ `apiclient.js` (missing hyphen)
+      3. Group related rules:
+         - Use consistent prefixes for related rules
+         - Group cloud-specific rules by provider
+         - Maintain clear categorization
 
-## Directories
+examples:
+  - input: |
+      # Bad: Invalid naming
+      CursorRule.md
+      code_style.mdc
+      GCP_BigQuery.mdc
+      aws-s3-rules.txt
+      dockerfile_standards.mdc
 
-1. Use kebab-case for all directory names
-2. Use descriptive names that indicate the directory's purpose
-3. Keep names concise but informative
-4. Avoid abbreviations unless they are widely accepted
+      # Good: Valid naming
+      cursor-rule-automation.mdc
+      code-style.mdc
+      code-gcp-bigquery.mdc
+      code-aws-s3.mdc
+      docker-optimization.mdc
 
-Examples:
-- ✅ `src/components`
-- ✅ `tests/integration`
-- ✅ `docs/api-reference`
-- ❌ `src/comp` (too abbreviated)
-- ❌ `test_integration` (using underscore instead of hyphen)
-- ❌ `docs/apiref` (using abbreviation)
+functions:
+  validate_naming: |
+    def check():
+      """
+      Validate rule file naming.
+      Returns (is_valid, issues).
+      """
+      issues = []
+      # Check prefix
+      if not has_valid_prefix():
+        issues.append("Invalid prefix")
+      # Check pattern
+      if not matches_naming_pattern():
+        issues.append("Invalid naming pattern")
+      # Check length
+      if not is_valid_length():
+        issues.append("Invalid length")
+      return len(issues) == 0, issues
 
-## Code Elements
+metrics:
+  - name: naming_violations
+    type: counter
+    labels: ["violation_type"]
+  - name: auto_renames
+    type: counter
+    labels: ["old_name", "new_name"]
+  - name: prefix_usage
+    type: counter
+    labels: ["prefix"]
 
-1. Use camelCase for:
-   - Variable names
-   - Function names
-   - Method names
-   - Property names
-
-2. Use PascalCase for:
-   - Class names
-   - Interface names
-   - Type names
-   - Enum names
-
-3. Use UPPER_SNAKE_CASE for:
-   - Constants
-   - Enum values
-   - Global variables
-
-4. Use descriptive names that clearly indicate the element's purpose
-5. Keep names concise but informative
-6. Avoid abbreviations unless they are widely accepted
-
-Examples:
-```typescript
-// Variables and functions
-const userCount = 0;
-function calculateTotal() {}
-const isValid = true;
-
-// Classes and interfaces
-class UserAuthentication {}
-interface DataValidator {}
-type ValidationResult = string | number;
-
-// Constants
-const MAX_RETRY_COUNT = 3;
-const API_BASE_URL = 'https://api.example.com';
-``` 
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - naming
+    - standards
+    - organization
+    - automation
+  changelog:
+    - 1.0: Initial version with comprehensive naming standards
+    - 1.1: Added cloud provider prefixes (gcp, aws, azure) 

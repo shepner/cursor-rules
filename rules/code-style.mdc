@@ -1,7 +1,23 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description: Standards for maintaining consistent code style across the project
+globs: ["*.py", "*.sql", "*.sh"]
+alwaysApply: true
+config:
+  style:
+    python:
+      max_line_length: 88
+      docstring_style: "google"
+      quote_style: "double"
+      import_order: ["stdlib", "third_party", "local"]
+    sql:
+      keyword_case: "upper"
+      indent_size: 4
+      max_line_length: 100
+      align_clauses: true
+    shell:
+      shellcheck_level: "error"
+      max_line_length: 100
+      quote_style: "double"
 ---
 # Code Style Guidelines
 
@@ -66,3 +82,180 @@ GROUP BY
 ## Version History
 - 1.0: Initial version
 - 1.1: Added SQL and shell script guidelines 
+
+<rule>
+name: code-style
+description: Standards for code formatting and style
+filters:
+  # Match source code files
+  - type: file_extension
+    pattern: "\\.(py|sql|sh)$"
+  # Match style patterns
+  - type: content
+    pattern: "(import|from|SELECT|FROM|WHERE|#!/bin/)"
+
+actions:
+  - type: reject
+    conditions:
+      # Reject long lines
+      - pattern: "^.{89,}"
+        message: "Line exceeds maximum length"
+      # Reject incorrect indentation
+      - pattern: "^[^\\s]|^\\s{1,3}|^\\s{5,}"
+        message: "Use 4 spaces for indentation"
+      # Reject missing docstrings
+      - pattern: "^def\\s+\\w+.*?(?!\\s*[\"'])"
+        message: "Add docstring to function"
+      # Reject incorrect SQL formatting
+      - pattern: "SELECT\\s+\\*\\s+FROM"
+        message: "List columns explicitly in SELECT"
+      # Reject incorrect shell formatting
+      - pattern: "\\$\\{[^}]+\\}"
+        message: "Use proper variable expansion"
+
+  - type: suggest
+    message: |
+      When formatting code:
+
+      1. Python Style:
+         - Follow PEP 8
+         - Use Google style docstrings
+         - Order imports correctly
+         - Use type hints
+         - Keep functions focused
+
+      2. SQL Style:
+         - Use uppercase keywords
+         - Align clauses
+         - List columns explicitly
+         - Use meaningful aliases
+         - Format complex queries
+
+      3. Shell Style:
+         - Use shellcheck
+         - Quote variables
+         - Handle errors
+         - Use functions
+         - Document scripts
+
+      4. General:
+         - Keep lines under limit
+         - Use consistent indentation
+         - Add whitespace
+         - Use meaningful names
+         - Comment complex logic
+
+examples:
+  - input: |
+      # Bad: Poor Python style
+      def process_data(data):
+          result=[]
+          for i in data:
+              if i>0:
+                  result.append(i*2)
+          return result
+
+      # Good: Proper Python style
+      from typing import List, Optional
+      
+      def process_data(data: List[float]) -> List[float]:
+          """Process input data and return doubled positive values.
+          
+          Args:
+              data: List of numeric values to process
+          
+          Returns:
+              List containing doubled positive values
+          """
+          result: List[float] = []
+          for value in data:
+              if value > 0:
+                  result.append(value * 2)
+          return result
+
+  - input: |
+      # Bad: Poor SQL style
+      select * from users u join orders o on u.id=o.user_id where o.status='active';
+
+      # Good: Proper SQL style
+      SELECT 
+          u.user_id,
+          u.username,
+          COUNT(o.order_id) AS order_count
+      FROM users u
+      LEFT JOIN orders o 
+          ON u.user_id = o.user_id
+      WHERE o.status = 'active'
+      GROUP BY 
+          u.user_id,
+          u.username;
+
+  - input: |
+      # Bad: Poor shell style
+      for i in $@; do
+      if [ $i -gt 0 ];then
+      echo $i
+      fi
+      done
+
+      # Good: Proper shell style
+      #!/bin/bash
+      set -euo pipefail
+      
+      process_numbers() {
+          local input_numbers=("$@")
+          
+          for number in "${input_numbers[@]}"; do
+              if (( number > 0 )); then
+                  echo "$number"
+              fi
+          done
+      }
+
+functions:
+  validate_style: |
+    def check():
+      """
+      Validate code style.
+      Returns (is_valid, issues).
+      """
+      issues = []
+      # Check line length
+      if exceeds_line_length():
+        issues.append("Line too long")
+      # Check indentation
+      if has_incorrect_indentation():
+        issues.append("Incorrect indentation")
+      # Check docstrings
+      if missing_docstring():
+        issues.append("Missing docstring")
+      return len(issues) == 0, issues
+
+metrics:
+  - name: style_violations
+    type: counter
+    labels: ["language", "violation_type"]
+  - name: auto_fixes
+    type: counter
+    labels: ["language", "fix_type"]
+  - name: line_lengths
+    type: histogram
+    labels: ["language"]
+  - name: docstring_coverage
+    type: gauge
+    labels: ["language"]
+  - name: formatting_time
+    type: histogram
+    labels: ["language"]
+
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - style
+    - formatting
+    - python
+    - sql
+    - shell
+  changelog:
+    - 1.0: Initial version with comprehensive style standards 

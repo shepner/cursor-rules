@@ -2,6 +2,17 @@
 description: Guidelines for data loading and processing
 globs: ["*.py", "*.sql", "*.json", "*.yaml", "*.yml", "*.parquet", "*.csv"]
 alwaysApply: true
+config:
+  loading:
+    max_batch_size: 10000
+    max_memory_mb: 1024
+    require_backup: true
+    require_validation: true
+  performance:
+    max_pattern_complexity: 100
+    max_validation_time_ms: 1000
+    batch_size: 10
+    cache_ttl_seconds: 3600
 ---
 # Data Loading Guidelines
 
@@ -201,6 +212,66 @@ examples:
               with timeout(seconds=30):
                   cleanup_query = "DROP TABLE IF EXISTS {temp_table_id}"
                   execute_with_retry(cleanup_query)
+
+functions:
+  validate_loading: |
+    def check():
+      """
+      Validate data loading.
+      Returns (is_valid, issues).
+      """
+      issues = []
+      # Check backup requirement
+      if not has_backup():
+        issues.append("Missing backup")
+      # Check validation
+      if not has_validation():
+        issues.append("Missing validation")
+      # Check batch size
+      if batch_size > config.loading.max_batch_size:
+        issues.append("Batch size too large")
+      # Check memory usage
+      if memory_mb > config.loading.max_memory_mb:
+        issues.append("Memory usage too high")
+      return len(issues) == 0, issues
+
+  check_performance: |
+    def check():
+      """
+      Check loading performance.
+      Returns (is_valid, issues).
+      """
+      issues = []
+      # Check pattern complexity
+      if pattern_complexity > config.performance.max_pattern_complexity:
+        issues.append("Pattern too complex")
+      # Check validation time
+      if validation_time_ms > config.performance.max_validation_time_ms:
+        issues.append("Validation too slow")
+      return len(issues) == 0, issues
+
+metrics:
+  - name: data_loaded
+    type: counter
+    labels: ["source_type"]
+  - name: processing_time
+    type: histogram
+    labels: ["operation_type"]
+  - name: validation_time
+    type: histogram
+    labels: ["check_type"]
+  - name: pattern_complexity
+    type: gauge
+    labels: ["pattern_type"]
+  - name: memory_usage
+    type: gauge
+    labels: ["operation_type"]
+  - name: loading_violations
+    type: counter
+    labels: ["violation_type"]
+  - name: auto_fixes
+    type: counter
+    labels: ["fix_type"]
 
 metadata:
   priority: high

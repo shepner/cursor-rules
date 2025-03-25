@@ -1,7 +1,23 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description: Standards for implementing comprehensive logging and monitoring across the project
+globs: ["*.py", "*.sql", "*.sh"]
+alwaysApply: true
+config:
+  logging:
+    required_fields:
+      - timestamp
+      - level
+      - component
+      - message
+    levels:
+      - ERROR
+      - WARNING
+      - INFO
+      - DEBUG
+    monitoring:
+      system_metrics: true
+      application_metrics: true
+      pipeline_metrics: true
 ---
 # Logging and Monitoring Guidelines
 
