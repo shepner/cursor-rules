@@ -72,6 +72,65 @@ def validate_yaml_frontmatter(file_path: str) -> tuple[bool, list[str]]:
         
     except Exception as e:
         return False, [f"Error validating YAML: {str(e)}"]
+
+def apply_fix(file_path: str, issue: str) -> bool:
+    """Apply a fix for a YAML validation issue."""
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+            
+        # Handle missing YAML frontmatter
+        if "Missing YAML frontmatter" in issue:
+            new_content = "---\ndescription: \"Rule description goes here\"\nglobs: [\"*.py\"]\nalwaysApply: true\n---\n\n" + content
+            with open(file_path, 'w') as f:
+                f.write(new_content)
+            return True
+            
+        # Handle missing required properties
+        if "Missing required property" in issue:
+            prop = issue.split(": ")[1]
+            parts = content.split('---')
+            if len(parts) >= 2:
+                yaml_content = parts[1].strip()
+                try:
+                    yaml_data = yaml.safe_load(yaml_content) or {}
+                    if prop == 'description':
+                        yaml_data[prop] = "Rule description goes here"
+                    elif prop == 'globs':
+                        yaml_data[prop] = ["*.py"]
+                    elif prop == 'alwaysApply':
+                        yaml_data[prop] = True
+                        
+                    new_yaml = yaml.dump(yaml_data, default_flow_style=False)
+                    new_content = parts[0] + "---\n" + new_yaml + "\n---" + "".join(parts[2:])
+                    with open(file_path, 'w') as f:
+                        f.write(new_content)
+                    return True
+                except:
+                    return False
+                    
+        # Handle forbidden properties
+        if "Contains forbidden property" in issue:
+            prop = issue.split(": ")[1]
+            parts = content.split('---')
+            if len(parts) >= 2:
+                yaml_content = parts[1].strip()
+                try:
+                    yaml_data = yaml.safe_load(yaml_content) or {}
+                    if prop in yaml_data:
+                        del yaml_data[prop]
+                        new_yaml = yaml.dump(yaml_data, default_flow_style=False)
+                        new_content = parts[0] + "---\n" + new_yaml + "\n---" + "".join(parts[2:])
+                        with open(file_path, 'w') as f:
+                            f.write(new_content)
+                        return True
+                except:
+                    return False
+                    
+    except Exception as e:
+        print(f"Error applying fix: {str(e)}")
+        
+    return False
 ```
 
 ## Examples

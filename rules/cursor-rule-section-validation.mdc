@@ -70,6 +70,39 @@ def validate_sections(file_path: str) -> tuple[bool, list[str]]:
         
     except Exception as e:
         return False, [f"Error validating sections: {str(e)}"]
+
+def apply_fix(file_path: str, issue: str) -> bool:
+    """Apply a fix for a missing section."""
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+            
+        # Extract the section name from the issue
+        section = issue.split(": ")[1]
+        
+        # Skip YAML frontmatter
+        parts = content.split('---')
+        if len(parts) >= 3:
+            content = parts[2]
+            
+        # Add the missing section
+        new_section = f"\n## {section}\n\n"
+        if section == 'Examples':
+            new_section += "Example 1:\n```python\n# Example code here\n```\n\n"
+            new_section += "Example 2:\n```python\n# Another example here\n```\n"
+        elif section in ['Description', 'Config', 'Filters', 'Actions', 'Metrics', 'Metadata']:
+            new_section += f"{section} content goes here\n"
+            
+        # Write the updated content
+        new_content = parts[0] + "---" + parts[1] + "---" + content + new_section
+        with open(file_path, 'w') as f:
+            f.write(new_content)
+        return True
+        
+    except Exception as e:
+        print(f"Error applying fix: {str(e)}")
+        
+    return False
 ```
 
 ## Examples

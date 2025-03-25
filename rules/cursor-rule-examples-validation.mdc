@@ -6,18 +6,18 @@ alwaysApply: true
 
 # Examples Validation
 
-This rule ensures that all Cursor rules have a sufficient number of examples and that they are properly formatted.
+This rule ensures that all Cursor rules have sufficient examples and are not too large.
 
 ## Description
 
-Validates that each Cursor rule has at least the minimum required number of examples and that they are properly formatted with code blocks.
+Validates that each Cursor rule has at least 2 examples and is not larger than 100KB.
 
 ## Config
 
 ```yaml
 validation:
   min_examples: 2
-  max_file_size: 10000  # bytes
+  max_file_size_kb: 100
 ```
 
 ## Filters
@@ -32,16 +32,16 @@ def check(file_path: str) -> bool:
 
 ```python
 def validate_examples(file_path: str) -> tuple[bool, list[str]]:
-    """Validate examples in a rule file."""
+    """Validate examples and file size in a rule file."""
     issues = []
     
     try:
         # Check file size
-        file_size = os.path.getsize(file_path)
-        if file_size > 10000:  # 10KB
-            issues.append(f"File too large: {file_size} bytes (max 10000)")
-            return False, issues
+        file_size_kb = os.path.getsize(file_path) / 1024
+        if file_size_kb > 100:
+            issues.append(f"File too large: {file_size_kb:.1f}KB (max 100KB)")
             
+        # Check examples
         with open(file_path, 'r') as f:
             content = f.read()
             
@@ -50,61 +50,88 @@ def validate_examples(file_path: str) -> tuple[bool, list[str]]:
         if len(parts) >= 3:
             content = parts[2]
             
-        # Find Examples section
-        examples_section = None
-        sections = content.split('\n## ')
-        for section in sections:
-            if section.startswith('Examples'):
-                examples_section = section
-                break
-                
-        if not examples_section:
-            issues.append("Missing Examples section")
-            return False, issues
-            
         # Count examples
-        example_count = 0
-        in_example = False
-        for line in examples_section.split('\n'):
-            if line.strip().startswith('Example'):
-                example_count += 1
-                in_example = True
-            elif line.strip().startswith('```'):
-                in_example = False
-                
+        example_count = content.count('Example 1:') + content.count('Example 2:')
         if example_count < 2:
-            issues.append(f"Insufficient examples: {example_count} (minimum 2)")
+            issues.append(f"Insufficient examples: {example_count} (min 2)")
             
         return len(issues) == 0, issues
         
     except Exception as e:
         return False, [f"Error validating examples: {str(e)}"]
+
+def apply_fix(file_path: str, issue: str) -> bool:
+    """Apply a fix for example validation issues."""
+    try:
+        if "Insufficient examples" in issue:
+            with open(file_path, 'r') as f:
+                content = f.read()
+                
+            # Skip YAML frontmatter
+            parts = content.split('---')
+            if len(parts) >= 3:
+                content = parts[2]
+                
+            # Add missing examples
+            if 'Example 1:' not in content:
+                new_example = "\nExample 1:\n```python\n# Example code here\n```\n"
+                content += new_example
+                
+            if 'Example 2:' not in content:
+                new_example = "\nExample 2:\n```python\n# Another example here\n```\n"
+                content += new_example
+                
+            # Write the updated content
+            new_content = parts[0] + "---" + parts[1] + "---" + content
+            with open(file_path, 'w') as f:
+                f.write(new_content)
+            return True
+            
+        elif "File too large" in issue:
+            # For file size issues, we can't automatically fix
+            print("File size too large. Please manually reduce the file size.")
+            return False
+            
+    except Exception as e:
+        print(f"Error applying fix: {str(e)}")
+        
+    return False
 ```
 
 ## Examples
 
-Example 1: Valid examples section
+Example 1: Valid examples
 ```markdown
+# Rule Title
+
 ## Examples
 
-Example 1: Basic usage
+Example 1:
 ```python
-# Example code here
+# First example code
+def example1():
+    pass
 ```
 
-Example 2: Advanced usage
+Example 2:
 ```python
-# More example code here
+# Second example code
+def example2():
+    pass
 ```
 ```
 
-Example 2: Invalid examples section (insufficient examples)
+Example 2: Invalid examples (insufficient)
 ```markdown
+# Rule Title
+
 ## Examples
 
-Example 1: Basic usage
+Example 1:
 ```python
 # Only one example
+def example():
+    pass
 ```
 ```
 
@@ -113,41 +140,30 @@ Example 1: Basic usage
 ```python
 def collect_metrics(file_path: str) -> dict:
     """Collect metrics about examples validation."""
-    with open(file_path, 'r') as f:
-        content = f.read()
+    try:
+        file_size_kb = os.path.getsize(file_path) / 1024
         
-    # Skip YAML frontmatter
-    parts = content.split('---')
-    if len(parts) >= 3:
-        content = parts[2]
-        
-    # Find Examples section
-    examples_section = None
-    sections = content.split('\n## ')
-    for section in sections:
-        if section.startswith('Examples'):
-            examples_section = section
-            break
+        with open(file_path, 'r') as f:
+            content = f.read()
             
-    if not examples_section:
+        # Skip YAML frontmatter
+        parts = content.split('---')
+        if len(parts) >= 3:
+            content = parts[2]
+            
+        example_count = content.count('Example 1:') + content.count('Example 2:')
+        
         return {
-            "has_examples_section": False,
-            "example_count": 0,
-            "file_size": os.path.getsize(file_path)
+            "file_size_kb": file_size_kb,
+            "example_count": example_count,
+            "has_sufficient_examples": example_count >= 2,
+            "is_within_size_limit": file_size_kb <= 100
         }
         
-    # Count examples
-    example_count = 0
-    for line in examples_section.split('\n'):
-        if line.strip().startswith('Example'):
-            example_count += 1
-            
-    return {
-        "has_examples_section": True,
-        "example_count": example_count,
-        "file_size": os.path.getsize(file_path),
-        "meets_minimum": example_count >= 2
-    }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 ```
 
 ## Metadata
@@ -157,6 +173,6 @@ category: validation
 severity: error
 tags:
   - examples
-  - documentation
+  - size
   - validation
 ``` 
