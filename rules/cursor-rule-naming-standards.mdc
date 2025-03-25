@@ -1,35 +1,11 @@
 ---
-description: Standards for naming Cursor rules and their files
+description: Standards for naming rules and their files
 globs: ["**/*.mdc"]
 alwaysApply: true
-config:
-  naming:
-    prefixes:
-      cursor:
-        - cursor-rule-*
-        - cursor-models-*
-      code:
-        - code-*
-        - code-gcp-*
-        - code-aws-*
-        - code-azure-*
-      git:
-        - git-*
-      docker:
-        - docker-*
-    patterns:
-      - pattern: "^[a-z0-9-]+$"
-        message: "Use kebab-case for all filenames"
-      - pattern: "^[a-z]+-"
-        message: "Start with a valid prefix"
-      - pattern: "\\.mdc$"
-        message: "Use .mdc extension"
-    max_length: 50
-    min_length: 10
 ---
 # Rule Naming Standards
 
-Standards for naming Cursor rules and their files.
+Standards for naming rules and their files.
 
 <rule>
 name: rule-naming
@@ -46,7 +22,7 @@ actions:
   - type: reject
     conditions:
       # Reject invalid prefixes
-      - pattern: "^(?!cursor-rule-|cursor-models-|code-|code-gcp-|code-aws-|code-azure-|git-|docker-)"
+      - pattern: "^(?!cursor-|cursor-rule-|code-|code-gcp-|code-aws-|code-azure-|git-|docker-)"
         message: "File must start with a valid prefix"
       # Reject invalid characters
       - pattern: "[^a-z0-9-]"
@@ -63,9 +39,9 @@ actions:
       When naming rule files:
 
       1. Use appropriate prefix:
-         - cursor-rule-* for core Cursor rules
-         - cursor-models-* for model definitions
-         - code-* for general code standards
+         - cursor-* for Cursor IDE configuration and settings
+         - cursor-rule-* for rules about how to write Cursor rules
+         - code-* for general coding standards
          - code-gcp-* for Google Cloud Platform standards
          - code-aws-* for AWS standards
          - code-azure-* for Azure standards
@@ -93,11 +69,12 @@ examples:
       dockerfile_standards.mdc
 
       # Good: Valid naming
-      cursor-rule-automation.mdc
-      code-style.mdc
-      code-gcp-bigquery.mdc
-      code-aws-s3.mdc
-      docker-optimization.mdc
+      cursor-rule-automation.mdc  # Rule about writing Cursor rules
+      cursor-settings.mdc        # Cursor IDE settings
+      code-style.mdc             # General coding style
+      code-gcp-bigquery.mdc      # GCP-specific coding standards
+      code-aws-s3.mdc            # AWS-specific coding standards
+      docker-optimization.mdc    # Docker-specific standards
 
 functions:
   validate_naming: |
@@ -139,4 +116,5 @@ metadata:
     - automation
   changelog:
     - 1.0: Initial version with comprehensive naming standards
-    - 1.1: Added cloud provider prefixes (gcp, aws, azure) 
+    - 1.1: Added cloud provider prefixes (gcp, aws, azure)
+    - 1.2: Clarified distinction between Cursor-specific and general coding rules 
