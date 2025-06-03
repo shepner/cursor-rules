@@ -3,6 +3,12 @@ description:
 globs: 
 alwaysApply: false
 ---
+---
+description: "Standards for implementing comprehensive data validation across the project, including input validation, schema checks, and data quality metrics. Applies to all programming languages."
+globs: ["*.*"]
+alwaysApply: true
+---
+
 # Data Validation Guidelines
 
 ## Overview

@@ -3,6 +3,12 @@ description:
 globs: 
 alwaysApply: false
 ---
+---
+description: "Standards for formatting ASCII filesystem trees and aligning comments for readability and consistency. Applies to all programming languages and documentation files."
+globs: ["*.*"]
+alwaysApply: true
+---
+
 # ASCII Filesystem Representation Guidelines
 
 Rules for ensuring consistent and readable ASCII-based filesystem representations.

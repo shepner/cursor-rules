@@ -3,6 +3,12 @@ description:
 globs: 
 alwaysApply: false
 ---
+---
+description: "Standards for software licensing, copyright management, and license header practices across the project. Applies to all programming languages and documentation files."
+globs: ["LICENSE*", "*.py", "*.sql", "*.sh", "*.md"]
+alwaysApply: true
+---
+
 # Licensing Guidelines
 
 ## Overview

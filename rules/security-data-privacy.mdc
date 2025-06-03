@@ -3,6 +3,12 @@ description:
 globs: 
 alwaysApply: false
 ---
+---
+description: "Standards for handling personally identifiable information (PII) and sensitive data, including privacy controls, encryption, and regulatory compliance. Applies to all programming languages and documentation files."
+globs: ["*.*"]
+alwaysApply: true
+---
+
 # Data Privacy Standards
 
 Rules for handling personally identifiable information (PII) and sensitive data.
