@@ -6,7 +6,7 @@ alwaysApply: false
 ---
 description: "Markdown Documentation Standards"
 globs: ["**/*.md"]
-# alwaysApply: true
+alwaysApply: false
 ---
 
 # Markdown Documentation Standards

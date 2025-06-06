@@ -6,7 +6,7 @@ alwaysApply: true
 ---
 description: "Data types rule. Update this description."
 globs: ["**/*.py"]
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Data Types Guidelines

@@ -6,7 +6,7 @@ alwaysApply: false
 ---
 description: "Definition for how Architectural documentation should be formatted"
 globs: ["ARCHITECTURE*.md"]
-# alwaysApply: true
+alwaysApply: false
 ---
 
 # Architectural documentation

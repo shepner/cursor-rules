@@ -3,6 +3,12 @@ description: Guidelines for handling timestamps and datetime conversions
 globs: ["*.py", "*.sql", "*.json", "*.yaml", "*.yml"]
 alwaysApply: true
 ---
+---
+description: Timestamp Handling Guidelines
+globs: ["**/*.{py,sql,json,yml,yaml}"]
+alwaysApply: false
+---
+
 # Timestamp Handling Guidelines
 
 Rules for consistent timestamp handling and conversions across the codebase.

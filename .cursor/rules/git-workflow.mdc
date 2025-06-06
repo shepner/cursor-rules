@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "Git workflow rules"
+globs: ["**/*"]
+alwaysApply: true
+---
+
 # Git workflow rules
 
 # Default behaviors for common git commands

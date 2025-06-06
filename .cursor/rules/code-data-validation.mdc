@@ -7,22 +7,6 @@ alwaysApply: false
 description: Standards for implementing comprehensive data validation across the project
 globs: ["**/*.{py,sql,js,ts,java,cpp,cs,go,rs,rb,php}"]
 alwaysApply: false
-config:
-  validation:
-    input:
-      require_type_checking: true
-      require_range_validation: true
-      require_consistency_check: true
-    bigquery:
-      require_schema_validation: true
-      require_quality_checks: true
-      require_relationship_validation: true
-    quality:
-      require_completeness: true
-      require_accuracy: true
-      require_consistency: true
-      require_timeliness: true
-      require_uniqueness: true
 ---
 
 # Data Validation Standards

@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "Rules for managing secure configuration and settings across applications."
+globs: ["**/*.{json,yaml,yml,toml,ini,conf,env}", "**/*{config,settings,environment}*"]
+alwaysApply: false
+---
+
 # Secure Configuration Standards
 
 Rules for managing secure configuration and settings across applications.

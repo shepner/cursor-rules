@@ -6,7 +6,7 @@ alwaysApply: true
 ---
 description: "Code Documentation Guidelines"
 globs: ["**/*.{py,js,ts,java,cpp,cs,go,rs,rb,php}"]
-#alwaysApply: true
+alwaysApply: false
 ---
 
 # Code Documentation Guidelines

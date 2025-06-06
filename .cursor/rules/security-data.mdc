@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "Rules for implementing secure data handling practices across the data lifecycle."
+globs: ["**/*.{py,js,ts,java,cpp,cs,go,rs,rb,php,sql,hql,yaml,yml,json}"]
+alwaysApply: false
+---
+
 # Data Security Standards
 
 Rules for implementing secure data handling practices across the data lifecycle.

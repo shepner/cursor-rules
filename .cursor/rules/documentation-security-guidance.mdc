@@ -4,7 +4,7 @@ globs:
 alwaysApply: false
 ---
 ---
-description: Security Guidance Documentation Standards
+description: "Standards for documenting security guidance, procedures, and best practices."
 globs: ["**/*.md"]
 alwaysApply: false
 ---

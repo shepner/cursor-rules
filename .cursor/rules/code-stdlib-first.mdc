@@ -1,8 +1,14 @@
 ---
 description: Encourage using standard library functions over third-party dependencies when possible
+globs: 
+alwaysApply: false
+---
+---
+description: Standard Library First
 globs: ["**/*.{py,rs,go,js,ts,java,kt,swift,cpp,c}"]
 alwaysApply: false
 ---
+
 # Standard Library First
 
 Guidelines for maximizing standard library usage and minimizing unnecessary dependencies.

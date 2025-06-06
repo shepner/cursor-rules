@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "Standards for documenting data classification, security controls, and compliance requirements."
+globs: ["Data/**/*.md", "Controls/**/*.md"]
+alwaysApply: false
+---
+
 # Data Classification and Security Documentation Standards
 
 ## Overview
@@ -76,8 +87,8 @@ examples:
 
       **Navigation:**
 
-      - Parent:: [Data Classification Index](../Data.md)
-      - Peer:: [PII Data](PII-Data.md)
+      - Parent:: [Data Classification Index](mdc:../Data.md)
+      - Peer:: [PII Data](mdc:PII-Data.md)
       - Child:: 
 
       # Financial Data Classification
@@ -114,8 +125,8 @@ examples:
 
       ## Related Documents
 
-      - [Security Controls](../Controls/Financial-Controls.md)
-      - [Encryption Standards](../Controls/Encryption.md)
+      - [Security Controls](mdc:../Controls/Financial-Controls.md)
+      - [Encryption Standards](mdc:../Controls/Encryption.md)
 
 metadata:
   priority: high

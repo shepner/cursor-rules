@@ -4,9 +4,9 @@ globs:
 alwaysApply: false
 ---
 ---
-description: "Security eviction rule. Update this description."
-globs: ["*.py"]
-alwaysApply: true
+description: "Rules for implementing comprehensive security eviction capabilities."
+globs: ["**/*.{py,js,ts,java,cpp,cs,go,rs,rb,php,yaml,yml,json,xml,conf,properties}"]
+alwaysApply: false
 ---
 
 # Security Eviction Standards

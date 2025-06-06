@@ -6,7 +6,7 @@ alwaysApply: true
 ---
 description: "Data types rule. Update this description."
 globs: ["**/*.{py,sql,json,yaml,yml}"]
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Schema Management Guidelines

@@ -1,3 +1,14 @@
+---
+description: Standards for Git usage and version control practices across the project.
+globs: 
+alwaysApply: false
+---
+---
+description: "Standards for Git usage and version control practices across the project."
+globs: ["**/*"]
+alwaysApply: true
+---
+
 # Git Best Practices
 
 ## Overview

@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "Rules for implementing comprehensive system and application hardening practices."
+globs: ["**/*.{py,js,ts,java,cpp,cs,go,rs,rb,php,yaml,yml,json,xml,conf,properties}"]
+alwaysApply: false
+---
+
 # System and Application Hardening Standards
 
 Rules for implementing comprehensive system and application hardening practices.

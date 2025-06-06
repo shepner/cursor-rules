@@ -3,6 +3,12 @@ description: Guidelines for optimizing Docker containers for size, performance, 
 globs: ["*Dockerfile*", "*.dockerfile", "docker-compose*.yml", "docker-compose*.yaml"]
 alwaysApply: true
 ---
+---
+description: "Docker Optimization Guidelines"
+globs: ["{Dockerfile*,*.{dockerfile,yml,yaml}}"]
+alwaysApply: false
+---
+
 # Docker Optimization Guidelines
 
 Rules for ensuring Docker containers are optimized for size, resource usage, and build time.

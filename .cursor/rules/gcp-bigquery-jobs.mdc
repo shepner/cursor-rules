@@ -1,23 +1,14 @@
 ---
-description: Standards for implementing and managing Google BigQuery jobs
-globs: ["*.sql", "*.py"]
-alwaysApply: true
-config:
-  bigquery:
-    job_config:
-      max_bytes_billed: 1000000000
-      max_bytes_processed: 1000000000
-      timeout_seconds: 3600
-      retry_count: 3
-    query_config:
-      use_legacy_sql: false
-      use_query_cache: true
-      maximum_bytes_processed: 1000000000
-    table_config:
-      clustering_fields: ["date", "type"]
-      partitioning_field: "date"
-      require_partition_filter: true
+description: Standards for implementing and managing Google BigQuery jobs.
+globs: 
+alwaysApply: false
 ---
+---
+description: "Standards for implementing and managing Google BigQuery jobs."
+globs: ["**/*.{sql,py}"]
+alwaysApply: false
+---
+
 # BigQuery Job Standards
 
 Standards for implementing and managing Google BigQuery jobs.

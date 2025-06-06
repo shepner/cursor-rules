@@ -1,12 +1,12 @@
 ---
 description: 
 globs: 
-alwaysApply: false
----
----
-description: "Standards for implementing comprehensive security modeling capabilities, including threat, behavior, risk, and baseline modeling. Applies to all programming languages and configuration files."
-globs: ["*.*"]
 alwaysApply: true
+---
+---
+description: "Rules for implementing comprehensive security modeling capabilities."
+globs: ["**/*.{py,js,ts,java,cpp,cs,go,rs,rb,php,yaml,yml,json,xml,conf,properties}"]
+alwaysApply: false
 ---
 
 # Security Modeling Standards

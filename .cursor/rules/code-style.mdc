@@ -2,23 +2,13 @@
 description: Standards for maintaining consistent code style across the project
 globs: ["*.py", "*.sql", "*.sh"]
 alwaysApply: true
-config:
-  style:
-    python:
-      max_line_length: 88
-      docstring_style: "google"
-      quote_style: "double"
-      import_order: ["stdlib", "third_party", "local"]
-    sql:
-      keyword_case: "upper"
-      indent_size: 4
-      max_line_length: 100
-      align_clauses: true
-    shell:
-      shellcheck_level: "error"
-      max_line_length: 100
-      quote_style: "double"
 ---
+---
+description: Code Style Guidelines
+globs: ["**/*.{py,sql,sh}"]
+alwaysApply: false
+---
+
 # Code Style Guidelines
 
 ## Overview

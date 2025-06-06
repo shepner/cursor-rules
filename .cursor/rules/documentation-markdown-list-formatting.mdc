@@ -6,7 +6,7 @@ alwaysApply: false
 ---
 description: "Markdown List Formatting Guidelines"
 globs: ["**/*.md"]
-# alwaysApply: true
+alwaysApply: false
 ---
 
 # Markdown List Formatting Guidelines

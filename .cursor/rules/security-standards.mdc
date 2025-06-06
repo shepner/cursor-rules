@@ -3,6 +3,12 @@ description: Standards for implementing secure coding practices and handling sen
 globs: ["*.py", "*.js", "*.ts", "*.java", "*.cpp", "*.cs", "*.go", "*.rs", "*.rb", "*.php", "*.{json,yaml,yml,toml,ini,conf}"]
 alwaysApply: true
 ---
+---
+description: "Rules for implementing secure coding practices and handling sensitive data across the development lifecycle."
+globs: ["**/*.{py,js,ts,java,cpp,cs,go,rs,rb,php,yaml,yml,json,xml,conf,properties}"]
+alwaysApply: false
+---
+
 # Security Standards
 
 Rules for implementing secure coding practices and handling sensitive data across the development lifecycle.

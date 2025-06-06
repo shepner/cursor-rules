@@ -3,6 +3,12 @@ description: Guidelines for handling data types and type conversions
 globs: ["*.py", "*.sql", "*.json", "*.yaml", "*.yml"]
 alwaysApply: true
 ---
+---
+description: "Rules for consistent data type handling and conversions across the codebase."
+globs: ["**/*.{py,sql,json,yaml,yml}"]
+alwaysApply: true
+---
+
 # Data Types Guidelines
 
 Rules for consistent data type handling and conversions across the codebase.
