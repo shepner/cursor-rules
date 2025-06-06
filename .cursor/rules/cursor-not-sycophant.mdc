@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: "Discourage sycophantic behavior in Cursor rules and automations. This rule applies at all times."

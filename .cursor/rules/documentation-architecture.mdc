@@ -1,7 +1,7 @@
 ---
 description: 
-globs: ARCHITECTURE*.md
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 ---
 description: "Definition for how Architectural documentation should be formatted"

@@ -1,7 +1,7 @@
 ---
-description: Encourage using standard library functions over third-party dependencies when possible
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: Standard Library First

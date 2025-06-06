@@ -1,10 +1,10 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
-description: Security Detection Standards
+description: Rules for implementing comprehensive security detection capabilities.
 globs: ["**/*"]
 alwaysApply: true
 ---

@@ -1,7 +1,7 @@
 ---
-description: Automatically manage license headers across all source files
-globs: ["**/*"]
-alwaysApply: false
+description: 
+globs: 
+alwaysApply: true
 ---
 ---
 description: License Header Management

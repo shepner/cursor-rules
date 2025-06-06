@@ -1,7 +1,7 @@
 ---
-description: Standards for Git usage and version control practices across the project.
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: "Standards for Git usage and version control practices across the project."

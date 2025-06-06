@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: "Standards and best practices for viewing, following, and analyzing Docker logs, including safe usage of log commands and time-based filtering. Applies to all file types and shell commands."

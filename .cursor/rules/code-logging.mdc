@@ -1,7 +1,7 @@
 ---
-description: Updated with comprehensive logging standards from technological controls
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: Standards for implementing comprehensive logging and monitoring across the project

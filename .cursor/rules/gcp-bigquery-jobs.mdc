@@ -1,7 +1,7 @@
 ---
-description: Standards for implementing and managing Google BigQuery jobs.
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: "Standards for implementing and managing Google BigQuery jobs."
