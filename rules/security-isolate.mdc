@@ -1,7 +1,0 @@
-# Security Isolation Standards
-
-Rules for implementing comprehensive security isolation capabilities.
-
-<rule>
-name: security-isolate
-// ... existing code ... 

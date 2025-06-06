@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "Security isolation rule. Update this description."
+globs: ["*.py"]
+alwaysApply: true
+---
+
+# Security Isolation Standards
+
+Rules for implementing comprehensive security isolation capabilities.
+
+<rule>
+# Security Isolation Standards
+
+Rules for implementing comprehensive security isolation capabilities.
+
+<rule>
+# Security Isolation Standards
+
+Rules for implementing comprehensive security isolation capabilities.
+
+<rule>
+name: security-isolate
+// ... existing code ... 

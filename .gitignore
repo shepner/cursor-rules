@@ -4,7 +4,7 @@
 .LSOverride
 
 # Cursor IDE files
-.cursor/
+# .cursor/
 
 # Python
 __pycache__/

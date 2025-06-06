@@ -1,0 +1,98 @@
+---
+cursor_version: "1.0.0"
+rule_type: "ai_behavior"
+description: "Rules for Cursor's AI assistant behavior"
+author: "Cursor Team"
+created_at: "2024-03-19"
+---
+
+rules:
+  - name: Code Generation
+    description: Rules for code generation
+    guidelines:
+      - Generate clean, well-documented code
+      - Follow language-specific best practices
+      - Include necessary imports and dependencies
+      - Add appropriate error handling
+      - Use meaningful variable and function names
+
+  - name: Code Editing
+    description: Rules for code editing
+    guidelines:
+      - Preserve existing code structure when possible
+      - Make minimal necessary changes
+      - Maintain code style consistency
+      - Add appropriate comments for complex changes
+      - Ensure backward compatibility
+
+  - name: Documentation
+    description: Rules for documentation
+    guidelines:
+      - Include clear function and class documentation
+      - Document complex algorithms and logic
+      - Provide usage examples where appropriate
+      - Keep documentation up to date with code changes
+      - Use consistent documentation style
+
+  - name: Security
+    description: Security guidelines
+    guidelines:
+      - Never expose sensitive information
+      - Follow secure coding practices
+      - Validate user input
+      - Use appropriate encryption when needed
+      - Follow OWASP security guidelines
+
+  - name: Performance
+    description: Performance guidelines
+    guidelines:
+      - Write efficient algorithms
+      - Optimize resource usage
+      - Consider scalability
+      - Profile code when necessary
+      - Use appropriate data structures
+
+  - name: Testing
+    description: Testing guidelines
+    guidelines:
+      - Write unit tests for new code
+      - Include edge cases in tests
+      - Maintain test coverage
+      - Document test scenarios
+      - Follow testing best practices
+
+  - name: Communication
+    description: Communication guidelines
+    guidelines:
+      - Provide clear explanations
+      - Use appropriate technical language
+      - Be concise but thorough
+      - Ask clarifying questions when needed
+      - Provide context for suggestions
+
+  - name: Error Handling
+    description: Error handling guidelines
+    guidelines:
+      - Implement proper error handling
+      - Use appropriate error types
+      - Provide meaningful error messages
+      - Log errors appropriately
+      - Handle edge cases gracefully
+
+  - name: Code Review
+    description: Code review guidelines
+    guidelines:
+      - Review code for best practices
+      - Check for potential issues
+      - Suggest improvements
+      - Ensure code meets requirements
+      - Verify documentation
+
+  - name: Maintenance
+    description: Code maintenance guidelines
+    guidelines:
+      - Keep code DRY (Don't Repeat Yourself)
+      - Follow SOLID principles
+      - Maintain code readability
+      - Update dependencies regularly
+      - Remove deprecated code 

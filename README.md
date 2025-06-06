@@ -30,6 +30,34 @@ This repository contains my personal collection of Cursor rules for use across d
    export CURSOR_RULES_BRANCH="main"
    ```
 
+## Best Practices for Writing Cursor Rules
+
+From https://docs.cursor.com/context/rules
+
+
+Example MDC rule:
+
+```
+---
+description: RPC Service boilerplate
+globs: 
+alwaysApply: false
+---
+
+- Use our internal RPC pattern when defining services
+- Always use snake_case for service names.
+
+@service-template.ts
+```
+
+Good rules are focused, actionable, and scoped. Follow these principles to ensure your rules are effective and maintainable:
+
+- **Keep rules concise.** Aim for under 500 lines per rule.
+- **Split large concepts into multiple, composable rules.** This makes each rule easier to understand and reuse.
+- **Provide concrete examples or reference files when helpful.** Use `@filename` to include templates or illustrative code.
+- **Avoid vague guidance.** Write rules as you would write a clear internal document—be specific and direct.
+- **Reuse rules when you find yourself repeating prompts in chat.** Modular, reusable rules save time and ensure consistency.
+
 ## License
 
 Copyright (c) 2024. All rights reserved. 
